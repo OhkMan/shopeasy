@@ -13,7 +13,6 @@ az webapp config appsettings set --name $appName --resource-group $resourceGroup
     "SQL_PASSWORD=Rohit#123",
     "SQL_SERVER=shopeasy-server.database.windows.net",
     "SQL_DATABASE=shopeasy-db",
-    "STORAGE_CONNECTION_STRING=$env:STORAGE_CONNECTION_STRING",
     "STORAGE_CONTAINER_NAME=product-images",
     "JWT_SECRET=shopeasy-secure-jwt-key-2024",
     "PORT=3000",
