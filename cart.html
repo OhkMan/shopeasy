@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - ShopEasy</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cart-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .cart-items {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .cart-summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: auto 3fr 1fr auto;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .item-details h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-color);
+        }
+
+        .item-details p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .quantity-btn:hover {
+            background: #eee;
+        }
+
+        .remove-item {
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .cart-summary h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .summary-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .promo-code {
+            margin: 20px 0;
+        }
+
+        .promo-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .promo-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .apply-btn {
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .checkout-btn:hover {
+            opacity: 0.9;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-cart h2 {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .cart-container {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-item {
+                grid-template-columns: auto 1fr;
+                grid-template-areas:
+                    "image details"
+                    "image quantity"
+                    "image remove";
+                gap: 10px;
+            }
+
+            .item-image {
+                grid-area: image;
+                width: 80px;
+                height: 80px;
+            }
+
+            .item-details {
+                grid-area: details;
+            }
+
+            .item-quantity {
+                grid-area: quantity;
+            }
+
+            .remove-item {
+                grid-area: remove;
+                justify-self: start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (Same as main page) -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">Shop<span>Easy</span></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products...">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="login.html">Login</a>
+                <a href="cart.html" class="cart-icon active">Cart <span class="cart-count">3</span></a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="cart-container">
+            <div class="cart-items">
+                <h2>Shopping Cart (3 items)</h2>
+                
+                <!-- Cart Item 1 -->
+                <div class="cart-item">
+                    <img src="/api/placeholder/100/100" alt="Product" class="item-image">
+                    <div class="item-details">
+                        <h3>Wireless Earbuds Pro Max</h3>
+                        <p>Color: Black</p>
+                        <p>$99.99</p>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn" onclick="updateQuantity(1, -1)">-</button>
+                        <span>1</span>
+                        <button class="quantity-btn" onclick="updateQuantity(1, 1)">+</button>
+                    </div>
+                    <button class="remove-item" onclick="removeItem(1)">×</button>
+                </div>
+
+                <!-- Cart Item 2 -->
+                <div class="cart-item">
+                    <img src="/api/placeholder/100/100" alt="Product" class="item-image">
+                    <div class="item-details">
+                        <h3>Smart Watch Series 5</h3>
+                        <p>Color: Silver</p>
+                        <p>$149.99</p>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn" onclick="updateQuantity(2, -1)">-</button>
+                        <span>1</span>
+                        <button class="quantity-btn" onclick="updateQuantity(2, 1)">+</button>
+                    </div>
+                    <button class="remove-item" onclick="removeItem(2)">×</button>
+                </div>
+
+                <!-- Cart Item 3 -->
+                <div class="cart-item">
+                    <img src="/api/placeholder/100/100" alt="Product" class="item-image">
+                    <div class="item-details">
+                        <h3>Laptop Backpack</h3>
+                        <p>Color: Navy Blue</p>
+                        <p>$59.99</p>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn" onclick="updateQuantity(3, -1)">-</button>
+                        <span>1</span>
+                        <button class="quantity-btn" onclick="updateQuantity(3, 1)">+</button>
+                    </div>
+                    <button class="remove-item" onclick="removeItem(3)">×</button>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$309.97</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>$31.00</span>
+                </div>
+                <div class="promo-code">
+                    <label>Promo Code</label>
+                    <div class="promo-input">
+                        <input type="text" placeholder="Enter code">
+                        <button class="apply-btn">Apply</button>
+                    </div>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total</span>
+                    <span>$340.97</span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (Same as main page) -->
+    <footer>
+        <!-- Footer content -->
+    </footer>
+
+    <script>
+        function updateQuantity(itemId, change) {
+            // Here you would update the quantity in your cart state/backend
+            const quantityElement = event.target.parentElement.querySelector('span');
+            let newQuantity = parseInt(quantityElement.textContent) + change;
+            
+            if (newQuantity >= 1) {
+                quantityElement.textContent = newQuantity;
+                updateCartTotal();
+            }
+        }
+
+        function removeItem(itemId) {
+            // Here you would remove the item from your cart state/backend
+            const cartItem = event.target.closest('.cart-item');
+            cartItem.remove();
+            
+            // Update cart count
+            const cartCount = document.querySelector('.cart-count');
+            cartCount.textContent = document.querySelectorAll('.cart-item').length;
+            
+            // Show empty cart message if no items left
+            if (document.querySelectorAll('.cart-item').length === 0) {
+                document.querySelector('.cart-items').innerHTML = `
+                    <div class="empty-cart">
+                        <h2>Your cart is empty</h2>
+                        <p>Looks like you haven't added any items to your cart yet.</p>
+                        <a href="index.html" class="btn">Continue Shopping</a>
+                    </div>
+                `;
+                document.querySelector('.cart-summary').style.display = 'none';
+            }
+            
+            updateCartTotal();
+        }
+
+        function updateCartTotal() {
+            // Here you would recalculate the cart total based on quantities and prices
+            // This is a simplified example
+            const items = document.querySelectorAll('.cart-item');
+            let subtotal = 0;
+            
+            items.forEach(item => {
+                const price = parseFloat(item.querySelector('.item-details p:last-child').textContent.replace('$', ''));
+                const quantity = parseInt(item.querySelector('.item-quantity span').textContent);
+                subtotal += price * quantity;
+            });
+            
+            const tax = subtotal * 0.1; // 10% tax rate
+            const total = subtotal + tax;
+            
+            // Update summary
+            document.querySelector('.summary-row:first-child span:last-child').textContent = `$${subtotal.toFixed(2)}`;
+            document.querySelector('.summary-row:nth-child(3) span:last-child').textContent = `$${tax.toFixed(2)}`;
+            document.querySelector('.summary-total span:last-child').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function proceedToCheckout() {
+            // Here you would implement checkout logic
+            alert('Checkout functionality would be implemented with backend integration');
+        }
+    </script>
+</body>
+</html> 

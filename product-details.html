@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - ShopEasy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header (Same as main page) -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">Shop<span>Easy</span></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for products...">
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="login.html">Login</a>
+                <a href="account.html">Account</a>
+                <a href="cart.html" class="cart-icon">Cart <span class="cart-count">0</span></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Product Details Section -->
+    <section class="container product-details">
+        <div class="product-grid" id="product-details-container">
+            <!-- Product details will be loaded dynamically -->
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="product-tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('description')">Description</button>
+                <button class="tab-btn" onclick="showTab('specifications')">Specifications</button>
+                <button class="tab-btn" onclick="showTab('reviews')">Reviews</button>
+            </div>
+            <div class="tab-content">
+                <div id="description" class="tab-pane active">
+                    <h2>Product Description</h2>
+                    <p>Detailed product description and features...</p>
+                </div>
+                <div id="specifications" class="tab-pane">
+                    <h2>Technical Specifications</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <td>Battery Life</td>
+                            <td>40 hours</td>
+                        </tr>
+                        <tr>
+                            <td>Bluetooth Version</td>
+                            <td>5.2</td>
+                        </tr>
+                        <!-- Add more specifications -->
+                    </table>
+                </div>
+                <div id="reviews" class="tab-pane">
+                    <h2>Customer Reviews</h2>
+                    <div class="reviews-container">
+                        <!-- Review items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <section class="related-products">
+            <h2>Related Products</h2>
+            <div class="products" id="related-products-container">
+                <!-- Related products will be loaded dynamically -->
+            </div>
+        </section>
+    </section>
+
+    <!-- Footer (Same as main page) -->
+    <footer>
+        <!-- Footer content -->
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        function loadProductDetails() {
+            const productId = new URLSearchParams(window.location.search).get('id');
+            const product = ProductService.getProductById(parseInt(productId));
+            
+            if (!product) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const container = document.getElementById('product-details-container');
+            container.innerHTML = `
+                <div class="product-images">
+                    <div class="main-image">
+                        <img src="${product.images[0]}" alt="${product.name}" id="main-product-image">
+                    </div>
+                    <div class="thumbnail-images">
+                        ${product.images.map((img, index) => `
+                            <img src="${img}" alt="Thumbnail ${index + 1}" onclick="updateMainImage(this.src)">
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="product-info-detailed">
+                    <h1>${product.name}</h1>
+                    <div class="product-rating">
+                        <span class="stars">${'★'.repeat(Math.floor(product.rating))}${product.rating % 1 ? '☆' : ''}</span>
+                        <span class="review-count">(${product.reviews} Reviews)</span>
+                    </div>
+                    <div class="product-price">
+                        <span class="current-price">$${product.price}</span>
+                        <span class="original-price">$${product.originalPrice}</span>
+                        <span class="discount">${Math.round((1 - product.price/product.originalPrice) * 100)}% OFF</span>
+                    </div>
+                    <div class="product-description">
+                        <p>${product.description}</p>
+                        <ul>
+                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="product-options">
+                        <div class="color-options">
+                            <h3>Color</h3>
+                            <div class="color-buttons">
+                                <button class="color-btn black active"></button>
+                                <button class="color-btn white"></button>
+                                <button class="color-btn blue"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="purchase-options">
+                        <div class="quantity-selector">
+                            <button onclick="updateQuantity(-1)">-</button>
+                            <input type="number" value="1" min="1" id="quantity">
+                            <button onclick="updateQuantity(1)">+</button>
+                        </div>
+                        <button class="btn add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
+                        <button class="btn buy-now-btn">Buy Now</button>
+                    </div>
+                    <div class="delivery-info">
+                        <p><i class="icon-delivery"></i> Free delivery on orders over $50</p>
+                        <p><i class="icon-return"></i> 30-day free returns</p>
+                    </div>
+                </div>
+            `;
+
+            // Load specifications
+            const specsTable = document.querySelector('.specs-table');
+            if (specsTable) {
+                specsTable.innerHTML = Object.entries(product.specifications)
+                    .map(([key, value]) => `
+                        <tr>
+                            <td>${key}</td>
+                            <td>${value}</td>
+                        </tr>
+                    `).join('');
+            }
+
+            // Load related products
+            loadRelatedProducts(product.id);
+        }
+
+        function loadRelatedProducts(productId) {
+            const container = document.getElementById('related-products-container');
+            const relatedProducts = ProductService.getRelatedProducts(productId);
+            
+            container.innerHTML = relatedProducts.map(product => `
+                <div class="product-card" data-product-id="${product.id}">
+                    <a href="product-details.html?id=${product.id}">
+                        <img src="${product.images[0]}" alt="${product.name}" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-title">${product.name}</h3>
+                            <p class="product-price">$${product.price}</p>
+                            <div class="product-rating">${'★'.repeat(Math.floor(product.rating))}${product.rating % 1 ? '☆' : ''}</div>
+                            <button class="btn" onclick="event.preventDefault(); addToCart(${product.id})">Add to Cart</button>
+                        </div>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function updateMainImage(src) {
+            document.getElementById('main-product-image').src = src;
+        }
+
+        function updateQuantity(change) {
+            const quantityInput = document.getElementById('quantity');
+            let newValue = parseInt(quantityInput.value) + change;
+            if (newValue >= 1) {
+                quantityInput.value = newValue;
+            }
+        }
+
+        function addToCart(productId) {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            CartService.addToCart(productId, quantity);
+            showSuccess('Product added to cart');
+        }
+
+        function showSuccess(message) {
+            // Implement your success notification system
+            alert(message);
+        }
+
+        function showTab(tabId) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Show selected tab pane
+            document.getElementById(tabId).classList.add('active');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', loadProductDetails);
+    </script>
+</body>
+</html> 
