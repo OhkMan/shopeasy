@@ -5,6 +5,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: shopeasy-app
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  NODE_VERSION: '18.x'
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -14,16 +19,32 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
 
     - name: npm install and build
       run: |
         npm install
         npm run build
 
+    - name: Create publish profile
+      run: |
+        cat << EOF > publish.xml
+        <publishData>
+          <publishProfile profileName="shopeasy-app - Web Deploy" publishMethod="MSDeploy" publishUrl="shopeasy-app-cgajaxd6audwa0ee.scm.centralindia-01.azurewebsites.net:443" msdeploySite="shopeasy-app" userName="$shopeasy-app" userPWD="2YHc1qo1IP4n0uzbFQOwHOvw1UcgQ1LO/+hfK97FYnUyf6w7hYhBGI8eB0WwlxDu3oq036OVcFbf+AStZQ3lJA==" destinationAppUrl="https://shopeasy-app-cgajx6audwa0ee.centralindia-01.azurewebsites.net" SQLServerDBConnectionString="Server=tcp:shopeasy-server.database.windows.net,1433;Initial Catalog=shopeasy-db;Persist Security Info=False;User ID=shopeasyadmin;Password=Rohit#124;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+            <databases />
+          </publishProfile>
+          <publishProfile profileName="shopeasy-app - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-pn1-029.ftp.azurewebsites.windows.net/site/wwwroot" ftpPassiveMode="True" userName="$shopeasy-app" userPWD="2YHc1qo1IP4n0uzbFQOwHOvw1UcgQ1LO/+hfK97FYnUyf6w7hYhBGI8eB0WwlxDu3oq036OVcFbf+AStZQ3lJA==" destinationAppUrl="https://shopeasy-app-cgajx6audwa0ee.centralindia-01.azurewebsites.net" SQLServerDBConnectionString="Server=tcp:shopeasy-server.database.windows.net,1433;Initial Catalog=shopeasy-db;Persist Security Info=False;User ID=shopeasyadmin;Password=Rohit#124;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+            <databases />
+          </publishProfile>
+          <publishProfile profileName="shopeasy-app - Zip Deploy" publishMethod="ZipDeploy" publishUrl="shopeasy-app-cgajaxd6audwa0ee.scm.centralindia-01.azurewebsites.net:443" userName="$shopeasy-app" userPWD="2YHc1qo1IP4n0uzbFQOwHOvw1UcgQ1LO/+hfK97FYnUyf6w7hYhBGI8eB0WwlxDu3oq036OVcFbf+AStZQ3lJA==" destinationAppUrl="https://shopeasy-app-cgajx6audwa0ee.centralindia-01.azurewebsites.net" SQLServerDBConnectionString="Server=tcp:shopeasy-server.database.windows.net,1433;Initial Catalog=shopeasy-db;Persist Security Info=False;User ID=shopeasyadmin;Password=Rohit#124;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+            <databases />
+          </publishProfile>
+        </publishData>
+        EOF
+
     - name: Deploy to Azure
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'shopeasy-app'
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: . 
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ github.workspace }}/publish.xml
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} 
