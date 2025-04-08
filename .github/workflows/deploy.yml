@@ -7,12 +7,11 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: shopeasy-app
-  AZURE_WEBAPP_PACKAGE_PATH: '.'
   NODE_VERSION: '18.x'
   RESOURCE_GROUP: shopeasy-rg
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -22,7 +21,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: npm install
+    - name: Install dependencies
       run: npm install
 
     - name: Azure Login
@@ -30,7 +29,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy to Azure
+    - name: Configure App Service
       run: |
         # Set environment variables
         az webapp config appsettings set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --settings @(
@@ -47,8 +46,16 @@ jobs:
           "WEBSITE_NODE_DEFAULT_VERSION=~18"
         )
 
-        # Create a zip file
-        zip -r app.zip . -x "node_modules/*" ".git/*" ".github/*"
+        # Configure Node.js
+        az webapp config set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --linux-fx-version "NODE|18-lts"
+
+        # Configure startup command
+        az webapp config set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --startup-file "npm install && npm start"
+
+    - name: Deploy to Azure
+      run: |
+        # Create a zip file excluding unnecessary files
+        zip -r app.zip . -x "node_modules/*" ".git/*" ".github/*" "*.zip"
 
         # Deploy the application
         az webapp deploy --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --src-path app.zip --type zip 
